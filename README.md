@@ -13,3 +13,13 @@ https://youtube.com/parttimelarry
 ## Sign up for TradingView to support this project:
 
 https://tradingview.go2cloud.org/SH4Gl
+
+## TradingView message format
+
+```
+{
+    "ticker": "{{ticker}}",
+    "direction": "{{strategy.order.action}}",
+    "passphrase": "yourpassphrase"
+}
+```
