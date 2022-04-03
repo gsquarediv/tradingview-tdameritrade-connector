@@ -1,0 +1,5 @@
+.chalice/deployments/
+.chalice/venv/
+chalicelib/token
+venv/
+__pycache__/
