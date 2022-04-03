@@ -14,6 +14,15 @@ https://youtube.com/parttimelarry
 
 https://tradingview.go2cloud.org/SH4Gl
 
+## Installation
+
+```
+python -m venv venv
+venv\Scripts\activate
+pip install tda-api
+pip install chalice
+```
+
 ## TradingView message format
 
 ```
