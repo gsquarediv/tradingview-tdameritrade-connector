@@ -19,8 +19,7 @@ https://tradingview.go2cloud.org/SH4Gl
 ```
 python -m venv venv
 venv\Scripts\activate
-pip install tda-api
-pip install chalice
+pip install -r requirements.txt
 ```
 
 ## TradingView message format
