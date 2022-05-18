@@ -73,7 +73,8 @@ def order():
         response = c.place_order(config.account_id, equities.equity_buy_market(webhook_message["ticker"], quantity))
     elif webhook_message['direction'] == "sell":
         quantity = positions(config.account_id).get(webhook_message["ticker"])
-        response = c.place_order(config.account_id, equities.equity_sell_market(webhook_message["ticker"], quantity))
+        if quantity is not None:
+            response = c.place_order(config.account_id, equities.equity_sell_market(webhook_message["ticker"], quantity))
 
     return {
         "code": "ok"
