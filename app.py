@@ -23,19 +23,11 @@ def quote(symbol):
 
     return response.json()
 
-""" @app.route('/accounts')
-def accounts():
-    response = c.get_accounts()
-
-    return response.json() """
-
-# @app.route('/account/{number}')
 def account(number):
     response = c.get_account(number)
 
     return response.json()
 
-# @app.route('/account/{number}/positions')
 def positions(number, fields=client.Client.Account.Fields.POSITIONS):
     response = c.get_account(number, fields=client.Client.Account.Fields.POSITIONS)
 
