@@ -50,6 +50,7 @@ def positions(number, fields=client.Client.Account.Fields.POSITIONS):
 @app.route('/order', methods=['POST'])
 def order():
     webhook_message = app.current_request.json_body
+    accounts = webhook_message["accounts"]
     size = 1.00 # portion of free equity to allocate to incoming buy orders
 
     print(webhook_message)
@@ -66,15 +67,16 @@ def order():
             "message": "Invalid passphrase"
         }
 
-    if webhook_message['direction'] == "buy":
-        price = quote(webhook_message["ticker"]).get(webhook_message["ticker"]).get("askPrice")
-        balance = account(config.account_id).get("securitiesAccount").get("currentBalances").get("availableFunds")
-        quantity = size * (balance // price)
-        response = c.place_order(config.account_id, equities.equity_buy_market(webhook_message["ticker"], quantity))
-    elif webhook_message['direction'] == "sell":
-        quantity = positions(config.account_id).get(webhook_message["ticker"])
-        if quantity is not None:
-            response = c.place_order(config.account_id, equities.equity_sell_market(webhook_message["ticker"], quantity))
+    for x in accounts:
+        if webhook_message['direction'] == "buy":
+            price = quote(webhook_message["ticker"]).get(webhook_message["ticker"]).get("askPrice")
+            balance = account(x).get("securitiesAccount").get("currentBalances").get("availableFunds")
+            quantity = size * (balance // price)
+            c.place_order(x, equities.equity_buy_market(webhook_message["ticker"], quantity))
+        elif webhook_message['direction'] == "sell":
+            quantity = positions(x).get(webhook_message["ticker"])
+            if quantity is not None:
+                c.place_order(x, equities.equity_sell_market(webhook_message["ticker"], quantity))
 
     return {
         "code": "ok"
