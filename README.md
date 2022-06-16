@@ -28,6 +28,7 @@ pip install -r requirements.txt
 {
     "ticker": "{{ticker}}",
     "direction": "{{strategy.order.action}}",
-    "passphrase": "yourpassphrase"
+    "passphrase": "yourpassphrase",
+    "accounts": ["123456789"]
 }
 ```
