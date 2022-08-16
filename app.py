@@ -15,7 +15,10 @@ try:
 except:
     token_path = os.path.join(os.path.dirname(__file__), 'chalicelib', 'token.json')
 
-c = auth.client_from_token_file(token_path, config.api_key)
+try:
+    c = auth.client_from_token_file(token_path, config.api_key)
+except FileNotFoundError:
+    c = auth.client_from_manual_flow(config.api_key, 'https://localhost', token_path)
 
 @app.route('/quote/{symbol}')
 def quote(symbol):
