@@ -1,6 +1,6 @@
 from tda import auth, client
 from tda.orders import equities
-import os
+import os, datetime
 from chalice import Chalice, Cron
 from chalicelib import config
 from shutil import copyfile
@@ -27,7 +27,8 @@ def quote(symbol):
     return response.json()
 
 # cron job to keep the refresh token alive if no REST calls are made during the expiration window
-@app.schedule(Cron(0, 17, '?', '*', '1-5', '*')) # Run every Monday - Friday at 1700
+timezone = datetime.datetime.now().hour - datetime.datetime.utcnow().hour
+@app.schedule(Cron(0, 17 - timezone, '?', '*', '1-5', '*')) # Run every Monday - Friday at 1700 local time
 def accounts(_):
     response = c.get_accounts()
     print(response.json())
