@@ -1,7 +1,7 @@
 from tda import auth, client
 from tda.orders import equities
 import os, datetime
-from chalice import Chalice, Cron
+from chalice import Chalice, Cron, UnauthorizedError
 from chalicelib import config
 from shutil import copyfile
 
@@ -59,16 +59,10 @@ def order():
     print(webhook_message)
     
     if 'passphrase' not in webhook_message:
-        return {
-            "code": "error",
-            "message": "Unauthorized, no passphrase"
-        }
+        raise UnauthorizedError("Unauthorized, no passphrase")
 
     if webhook_message['passphrase'] != config.passphrase:
-        return {
-            "code": "error",
-            "message": "Invalid passphrase"
-        }
+        raise UnauthorizedError("Invalid passphrase")
 
     for x in accounts:
         if webhook_message['direction'] == "buy":
