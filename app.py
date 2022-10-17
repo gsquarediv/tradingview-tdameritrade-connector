@@ -4,6 +4,7 @@ import os, datetime
 from chalice import Chalice, Cron, UnauthorizedError
 from chalicelib import config
 from shutil import copyfile
+from base64 import b64decode
 
 app = Chalice(app_name='tradingview-tdameritrade-alert')
 
@@ -61,7 +62,10 @@ def order():
     if 'passphrase' not in webhook_message:
         raise UnauthorizedError("Unauthorized, no passphrase")
 
-    if webhook_message['passphrase'] != config.passphrase:
+    try:
+        if str(b64decode(webhook_message['passphrase']), "utf-8") != config.passphrase:
+            raise UnauthorizedError("Invalid passphrase")
+    except:
         raise UnauthorizedError("Invalid passphrase")
 
     for x in accounts:
