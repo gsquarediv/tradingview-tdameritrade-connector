@@ -13,7 +13,7 @@ from chalicelib import config
 
 app = Chalice(app_name='tradingview-tdameritrade-alert')
 
-# Try to get a fresh token from TD Ameritrade and upload it to AWS S3
+# Get a fresh token from TD Ameritrade and upload it to AWS S3
 def get_new_token():
     s3 = boto3.client('s3')
     token_path = os.path.join(os.path.dirname(__file__), 'chalicelib', 'token.json')
