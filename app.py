@@ -13,8 +13,8 @@ from chalicelib import config
 
 app = Chalice(app_name='tradingview-tdameritrade-alert')
 
+# Try to get a fresh token from TD Ameritrade and upload it to AWS S3
 def get_new_token():
-    # Try to get a fresh token.
     s3 = boto3.client('s3')
     token_path = os.path.join(os.path.dirname(__file__), 'chalicelib', 'token.json')
     auth.client_from_manual_flow(config.api_key, 'https://localhost', token_path)
@@ -38,7 +38,7 @@ def write_token(token, *args, **kwargs):
 
 c = auth.client_from_access_functions(config.api_key, token_read_func=read_token, token_write_func=write_token)
 
-# cron job to keep the refresh token alive if no REST calls are made during the expiration window
+# Cron job to keep the refresh token alive if no REST calls are made during the expiration window
 @app.schedule(Rate(1, unit=Rate.DAYS)) # Run once per day
 def keep_alive(self):
     c.ensure_updated_refresh_token()
