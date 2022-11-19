@@ -51,11 +51,6 @@ def quote(symbol):
 
     return response.json()
 
-def accounts(_):
-    response = c.get_accounts()
-    print(response.json())
-    return
-
 def account(number):
     response = c.get_account(number)
 
