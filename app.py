@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import httpx
 from base64 import b64decode
 
 import boto3
@@ -92,11 +93,21 @@ def order():
             price = quote(ticker).get(ticker).get("askPrice")
             balance = account(x).get("securitiesAccount").get("currentBalances").get("availableFunds")
             quantity = math.floor(webhook_message["size"] * (balance / price))
-            c.place_order(x, equities.equity_buy_market(ticker, quantity))
+            response = c.place_order(x, equities.equity_buy_market(ticker, quantity))
+            try: 
+                response.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                print(json.dumps(response.json(), indent=4))
+                raise e
         elif webhook_message['direction'] == "sell":
             quantity = positions(x).get(ticker)
             if quantity is not None:
-                c.place_order(x, equities.equity_sell_market(ticker, quantity))
+                response = c.place_order(x, equities.equity_sell_market(ticker, quantity))
+                try: 
+                    response.raise_for_status()
+                except httpx.HTTPStatusError as e:
+                    print(json.dumps(response.json(), indent=4))
+                    raise e
 
     return {
         "code": "ok"
