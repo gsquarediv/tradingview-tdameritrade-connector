@@ -13,11 +13,11 @@ from chalicelib import config
 
 app = Chalice(app_name='tradingview-tdameritrade-alert')
 
-def token_error_handler():
+def get_new_token():
     # Try to get a fresh token.
+    s3 = boto3.client('s3')
     token_path = os.path.join(os.path.dirname(__file__), 'chalicelib', 'token.json')
     auth.client_from_manual_flow(config.api_key, 'https://localhost', token_path)
-    s3 = boto3.client('s3')
     s3.upload_file(token_path, 'td-ameritrade', 'token.json')
     return
 
@@ -26,7 +26,7 @@ def read_token():
     try:
         s3_object = s3.get_object(Bucket='td-ameritrade', Key='token.json')
     except s3.exceptions.NoSuchKey:
-        token_error_handler()
+        get_new_token()
         s3_object = s3.get_object(Bucket='td-ameritrade', Key='token.json')
     s3token = json.loads(s3_object['Body'].read().decode('utf-8'))
     return s3token
