@@ -19,7 +19,7 @@ https://tradingview.go2cloud.org/SH4Gl
 ```
 python -m venv venv
 venv\Scripts\activate
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ## TradingView message format

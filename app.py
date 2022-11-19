@@ -73,7 +73,7 @@ def positions(number):
 @app.route('/order', methods=['POST'])
 def order():
     webhook_message = app.current_request.json_body
-    accounts = webhook_message["accounts"]
+    ticker = webhook_message["ticker"]
     size = 1.00 # portion of free equity to allocate to incoming buy orders
 
     print(webhook_message)
@@ -87,16 +87,16 @@ def order():
     except:
         raise UnauthorizedError("Invalid passphrase")
 
-    for x in accounts:
+    for x in webhook_message["accounts"]:
         if webhook_message['direction'] == "buy":
-            price = quote(webhook_message["ticker"]).get(webhook_message["ticker"]).get("askPrice")
+            price = quote(ticker).get(ticker).get("askPrice")
             balance = account(x).get("securitiesAccount").get("currentBalances").get("availableFunds")
             quantity = size * (balance // price)
-            c.place_order(x, equities.equity_buy_market(webhook_message["ticker"], quantity))
+            c.place_order(x, equities.equity_buy_market(ticker, quantity))
         elif webhook_message['direction'] == "sell":
-            quantity = positions(x).get(webhook_message["ticker"])
+            quantity = positions(x).get(ticker)
             if quantity is not None:
-                c.place_order(x, equities.equity_sell_market(webhook_message["ticker"], quantity))
+                c.place_order(x, equities.equity_sell_market(ticker, quantity))
 
     return {
         "code": "ok"
