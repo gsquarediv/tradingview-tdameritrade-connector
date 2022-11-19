@@ -1,4 +1,5 @@
 import json
+import math
 import os
 from base64 import b64decode
 
@@ -74,7 +75,6 @@ def positions(number):
 def order():
     webhook_message = app.current_request.json_body
     ticker = webhook_message["ticker"]
-    size = 1.00 # portion of free equity to allocate to incoming buy orders
 
     print(webhook_message)
     
@@ -91,7 +91,7 @@ def order():
         if webhook_message['direction'] == "buy":
             price = quote(ticker).get(ticker).get("askPrice")
             balance = account(x).get("securitiesAccount").get("currentBalances").get("availableFunds")
-            quantity = size * (balance // price)
+            quantity = math.floor(webhook_message["size"] * (balance / price))
             c.place_order(x, equities.equity_buy_market(ticker, quantity))
         elif webhook_message['direction'] == "sell":
             quantity = positions(x).get(ticker)

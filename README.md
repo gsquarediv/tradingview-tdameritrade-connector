@@ -29,6 +29,7 @@ python -m pip install -r requirements.txt
     "ticker": "{{ticker}}",
     "direction": "{{strategy.order.action}}",
     "passphrase": "Base64EncodedPassphrase",
-    "accounts": ["123456789"]
+    "accounts": ["123456789"],
+    "size": 1.00
 }
 ```
