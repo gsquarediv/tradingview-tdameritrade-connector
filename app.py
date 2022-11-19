@@ -75,7 +75,7 @@ def positions(number):
 @app.route('/order', methods=['POST'])
 def order():
     webhook_message = app.current_request.json_body
-    ticker = webhook_message["ticker"]
+    ticker = webhook_message['ticker']
 
     print(webhook_message)
     
@@ -88,11 +88,11 @@ def order():
     except:
         raise UnauthorizedError("Invalid passphrase")
 
-    for x in webhook_message["accounts"]:
+    for x in webhook_message['accounts']:
         if webhook_message['direction'] == "buy":
             price = quote(ticker).get(ticker).get("askPrice")
             balance = account(x).get("securitiesAccount").get("currentBalances").get("availableFunds")
-            quantity = math.floor(webhook_message["size"] * (balance / price))
+            quantity = math.floor(webhook_message['size'] * (balance / price))
             response = c.place_order(x, equities.equity_buy_market(ticker, quantity))
             try: 
                 response.raise_for_status()
