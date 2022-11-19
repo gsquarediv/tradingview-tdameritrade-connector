@@ -1,25 +1,47 @@
+import json
+import os
+from base64 import b64decode
+
+import boto3
+from chalice import Chalice, UnauthorizedError, Rate
 from tda import auth, client
 from tda.orders import equities
-import os, datetime
-from chalice import Chalice, Cron, UnauthorizedError
+
 from chalicelib import config
-from shutil import copyfile
-from base64 import b64decode
 
 app = Chalice(app_name='tradingview-tdameritrade-alert')
 
-try:
-    token_path = os.path.join(os.path.normpath('/tmp'), 'token.json')
-    token_exists = os.path.exists(token_path)
-    if token_exists == False:
-        copyfile(os.path.join(os.path.dirname(__file__), 'chalicelib', 'token.json'), token_path)
-except:
+def token_error_handler():
+    # Try to get a fresh token.
     token_path = os.path.join(os.path.dirname(__file__), 'chalicelib', 'token.json')
+    auth.client_from_manual_flow(config.api_key, 'https://localhost', token_path)
+    s3 = boto3.client('s3')
+    s3.upload_file(token_path, 'td-ameritrade', 'token.json')
+    return
 
-try:
-    c = auth.client_from_token_file(token_path, config.api_key)
-except FileNotFoundError:
-    c = auth.client_from_manual_flow(config.api_key, 'https://localhost', token_path)
+def read_token():
+    s3 = boto3.client('s3')
+    try:
+        s3_object = s3.get_object(Bucket='td-ameritrade', Key='token.json')
+    except s3.exceptions.NoSuchKey:
+        token_error_handler()
+        s3_object = s3.get_object(Bucket='td-ameritrade', Key='token.json')
+    s3token = json.loads(s3_object['Body'].read().decode('utf-8'))
+    return s3token
+
+def write_token(token, *args, **kwargs):
+    s3 = boto3.client('s3')
+    s3.put_object(Body=json.dumps(token), Bucket='td-ameritrade', Key='token.json')
+    return
+
+c = auth.client_from_access_functions(config.api_key, token_read_func=read_token, token_write_func=write_token)
+
+# cron job to keep the refresh token alive if no REST calls are made during the expiration window
+@app.schedule(Rate(1, unit=Rate.DAYS)) # Run once per day
+def keep_alive(self):
+    c.ensure_updated_refresh_token()
+    print("Token refreshed.")
+    return
 
 @app.route('/quote/{symbol}')
 def quote(symbol):
@@ -27,9 +49,6 @@ def quote(symbol):
 
     return response.json()
 
-# cron job to keep the refresh token alive if no REST calls are made during the expiration window
-timezone = datetime.datetime.now().hour - datetime.datetime.utcnow().hour
-@app.schedule(Cron(0, 17 - timezone, '?', '*', '1-5', '*')) # Run every Monday - Friday at 1700 local time
 def accounts(_):
     response = c.get_accounts()
     print(response.json())
