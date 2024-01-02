@@ -46,10 +46,17 @@ def keep_alive(self):
     return
 
 @app.route('/quote/{symbol}')
-def quote(symbol):
-    response = c.get_quote(symbol)
+def get_quote(symbol):
+    response = c.get_quotes(symbol)
 
     return response.json()
+
+def calculate_notional_value(quote):
+    if quote.get("assetType") == c.Markets.FUTURE.name:
+        price = quote.get("askPriceInDouble") * quote.get("futureMultiplier")
+    else:
+        price = quote.get("askPrice")
+    return price
 
 def account(number):
     response = c.get_account(number)
@@ -85,7 +92,8 @@ def order():
 
     for x in webhook_message['accounts']:
         if webhook_message['direction'] == "buy":
-            price = quote(ticker).get(ticker).get("askPrice")
+            quote = get_quote(ticker).get(ticker)
+            price = calculate_notional_value(quote)
             balance = account(x).get("securitiesAccount").get("currentBalances").get("availableFunds")
             quantity = math.floor(webhook_message['size'] * (balance / price))
             response = c.place_order(x, equities.equity_buy_market(ticker, quantity))
